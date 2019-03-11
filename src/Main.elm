@@ -2,7 +2,7 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Array exposing (Array, empty, push, toList)
 import Browser
-import Html exposing (Attribute, Html, button, div, form, input, label, li, ol, text)
+import Html exposing (Attribute, Html, button, div, form, input, label, li, ol, p, text)
 import Html.Attributes exposing (attribute, class, for, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 
@@ -15,16 +15,22 @@ main =
 -- MODEL
 
 
+type WizardStep
+    = AddingTerms
+    | GeneratingCard
+
+
 type alias Model =
     { newTerm : String
     , terms : List String
     , feedback : Maybe String
+    , wizardStep : WizardStep
     }
 
 
 init : Model
 init =
-    Model "" [] Nothing
+    Model "" [] Nothing AddingTerms
 
 
 
@@ -52,9 +58,19 @@ update msg model =
                 { model | feedback = Just "Each term can only be used once." }
 
         UpdateNewTerm updatedTerm ->
+            let
+                wizardStep =
+                    case List.length model.terms of
+                        24 ->
+                            GeneratingCard
+
+                        _ ->
+                            AddingTerms
+            in
             { model
                 | newTerm = updatedTerm
                 , feedback = Nothing
+                , wizardStep = wizardStep
             }
 
         RemoveTerm existingTerm ->
@@ -86,10 +102,11 @@ role roleValue =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ feedbackDiv model
-        , ol [] (termsList model.terms)
-        , termForm model
-        ]
+        ([ feedbackDiv model
+         , p [ class "lead" ] [ text "Add 24 terms to create your custom bingo card." ]
+         ]
+            ++ bingoCardWizard model
+        )
 
 
 feedbackDiv : Model -> Html msg
@@ -100,6 +117,18 @@ feedbackDiv model =
 
         Nothing ->
             div [] []
+
+
+bingoCardWizard : Model -> List (Html Msg)
+bingoCardWizard model =
+    case model.wizardStep of
+        AddingTerms ->
+            [ ol [] (termsList model.terms)
+            , termForm model
+            ]
+
+        GeneratingCard ->
+            [ text "My cool card" ]
 
 
 termsList : List String -> List (Html Msg)

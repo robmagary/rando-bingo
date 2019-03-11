@@ -519,11 +519,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.U.I === region._.I)
+	if (region.U.I === region.Z.I)
 	{
 		return 'on line ' + region.U.I;
 	}
-	return 'on lines ' + region.U.I + ' through ' + region._.I;
+	return 'on lines ' + region.U.I + ' through ' + region.Z.I;
 }
 
 
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aF,
-		impl.aQ,
-		impl.aO,
+		impl.aE,
+		impl.aP,
+		impl.aN,
 		function() { return function() {} }
 	);
 });
@@ -3883,11 +3883,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aF,
-		impl.aQ,
-		impl.aO,
+		impl.aE,
+		impl.aP,
+		impl.aN,
 		function(sendToApp, initialModel) {
-			var view = impl.aS;
+			var view = impl.aR;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3919,12 +3919,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aF,
-		impl.aQ,
-		impl.aO,
+		impl.aE,
+		impl.aP,
+		impl.aN,
 		function(sendToApp, initialModel) {
 			var divertHrefToApp = impl.J && impl.J(sendToApp)
-			var view = impl.aS;
+			var view = impl.aR;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3932,12 +3932,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.ay);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.ax);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.aP) && (_VirtualDom_doc.title = title = doc.aP);
+				(title !== doc.aO) && (_VirtualDom_doc.title = title = doc.aO);
 			});
 		}
 	);
@@ -3993,8 +3993,8 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.aH;
-	var onUrlRequest = impl.aI;
+	var onUrlChange = impl.aG;
+	var onUrlRequest = impl.aH;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
@@ -4014,9 +4014,9 @@ function _Browser_application(impl)
 					var next = elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.al === next.al
-							&& curr.ac === next.ac
-							&& curr.ai.a === next.ai.a
+							&& curr.ak === next.ak
+							&& curr.ab === next.ab
+							&& curr.ah.a === next.ah.a
 						)
 							? elm$browser$Browser$Internal(next)
 							: elm$browser$Browser$External(href)
@@ -4024,13 +4024,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		aF: function(flags)
+		aE: function(flags)
 		{
-			return A3(impl.aF, flags, _Browser_getUrl(), key);
+			return A3(impl.aE, flags, _Browser_getUrl(), key);
 		},
-		aS: impl.aS,
-		aQ: impl.aQ,
-		aO: impl.aO
+		aR: impl.aR,
+		aP: impl.aP,
+		aN: impl.aN
 	});
 }
 
@@ -4096,17 +4096,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aD: 'hidden', az: 'visibilitychange' }
+		? { aC: 'hidden', ay: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aD: 'mozHidden', az: 'mozvisibilitychange' }
+		? { aC: 'mozHidden', ay: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aD: 'msHidden', az: 'msvisibilitychange' }
+		? { aC: 'msHidden', ay: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aD: 'webkitHidden', az: 'webkitvisibilitychange' }
-		: { aD: 'hidden', az: 'visibilitychange' };
+		? { aC: 'webkitHidden', ay: 'webkitvisibilitychange' }
+		: { aC: 'hidden', ay: 'visibilitychange' };
 }
 
 
@@ -4187,8 +4187,8 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		ar: _Browser_getScene(),
-		av: {
+		aq: _Browser_getScene(),
+		au: {
 			O: _Browser_window.pageXOffset,
 			P: _Browser_window.pageYOffset,
 			F: _Browser_doc.documentElement.clientWidth,
@@ -4226,11 +4226,11 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			ar: {
+			aq: {
 				F: node.scrollWidth,
 				A: node.scrollHeight
 			},
-			av: {
+			au: {
 				O: node.scrollLeft,
 				P: node.scrollTop,
 				F: node.clientWidth,
@@ -4264,14 +4264,14 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			ar: _Browser_getScene(),
-			av: {
+			aq: _Browser_getScene(),
+			au: {
 				O: x,
 				P: y,
 				F: _Browser_doc.documentElement.clientWidth,
 				A: _Browser_doc.documentElement.clientHeight
 			},
-			aA: {
+			az: {
 				O: x + rect.left,
 				P: y + rect.top,
 				F: rect.width,
@@ -4310,10 +4310,9 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$AddingTerms = 0;
-var author$project$Main$Model = F4(
-	function (newTerm, terms, feedback, wizardStep) {
-		return {H: feedback, v: newTerm, r: terms, W: wizardStep};
+var author$project$Main$Model = F3(
+	function (newTerm, terms, feedback) {
+		return {H: feedback, u: newTerm, w: terms};
 	});
 var elm$core$Maybe$Nothing = {$: 1};
 var elm$core$Basics$EQ = 1;
@@ -4396,8 +4395,7 @@ var elm$core$Set$toList = function (_n0) {
 	var dict = _n0;
 	return elm$core$Dict$keys(dict);
 };
-var author$project$Main$init = A4(author$project$Main$Model, '', _List_Nil, elm$core$Maybe$Nothing, 0);
-var author$project$Main$GeneratingCard = 1;
+var author$project$Main$init = A3(author$project$Main$Model, '', _List_Nil, elm$core$Maybe$Nothing);
 var elm$core$Basics$not = _Basics_not;
 var elm$core$Basics$eq = _Utils_equal;
 var elm$core$Basics$False = 1;
@@ -4433,7 +4431,7 @@ var elm$core$List$member = F2(
 			xs);
 	});
 var author$project$Main$termIsUnique = function (model) {
-	return !A2(elm$core$List$member, model.v, model.r);
+	return !A2(elm$core$List$member, model.u, model.w);
 };
 var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$gt = _Utils_gt;
@@ -4525,16 +4523,6 @@ var elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
-var elm$core$List$length = function (xs) {
-	return A3(
-		elm$core$List$foldl,
-		F2(
-			function (_n0, i) {
-				return i + 1;
-			}),
-		0,
-		xs);
-};
 var elm$core$Maybe$Just = function (a) {
 	return {$: 0, a: a};
 };
@@ -4547,8 +4535,8 @@ var author$project$Main$update = F2(
 					model,
 					{
 						H: elm$core$Maybe$Nothing,
-						v: '',
-						r: A2(elm$core$List$cons, newTerm, model.r)
+						u: '',
+						w: A2(elm$core$List$cons, newTerm, model.w)
 					}) : _Utils_update(
 					model,
 					{
@@ -4556,17 +4544,9 @@ var author$project$Main$update = F2(
 					});
 			case 2:
 				var updatedTerm = msg.a;
-				var wizardStep = function () {
-					var _n1 = elm$core$List$length(model.r);
-					if (_n1 === 24) {
-						return 1;
-					} else {
-						return 0;
-					}
-				}();
 				return _Utils_update(
 					model,
-					{H: elm$core$Maybe$Nothing, v: updatedTerm, W: wizardStep});
+					{H: elm$core$Maybe$Nothing, u: updatedTerm});
 			default:
 				var existingTerm = msg.a;
 				var updatedTerms = A2(
@@ -4574,18 +4554,12 @@ var author$project$Main$update = F2(
 					function (term) {
 						return !_Utils_eq(term, existingTerm);
 					},
-					model.r);
+					model.w);
 				return _Utils_update(
 					model,
-					{r: updatedTerms});
+					{w: updatedTerms});
 		}
 	});
-var author$project$Main$AddTerm = function (a) {
-	return {$: 0, a: a};
-};
-var author$project$Main$UpdateNewTerm = function (a) {
-	return {$: 2, a: a};
-};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -4785,6 +4759,16 @@ var elm$core$Char$isDigit = function (_char) {
 var elm$core$Char$isAlphaNum = function (_char) {
 	return elm$core$Char$isLower(_char) || (elm$core$Char$isUpper(_char) || elm$core$Char$isDigit(_char));
 };
+var elm$core$List$length = function (xs) {
+	return A3(
+		elm$core$List$foldl,
+		F2(
+			function (_n0, i) {
+				return i + 1;
+			}),
+		0,
+		xs);
+};
 var elm$core$List$map2 = _List_map2;
 var elm$core$List$rangeHelp = F3(
 	function (lo, hi, list) {
@@ -4958,11 +4942,18 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$html$Html$button = _VirtualDom_node('button');
+var elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var elm$html$Html$Attributes$attribute = elm$virtual_dom$VirtualDom$attribute;
+var author$project$Main$role = function (roleValue) {
+	return A2(elm$html$Html$Attributes$attribute, 'role', roleValue);
+};
 var elm$html$Html$div = _VirtualDom_node('div');
-var elm$html$Html$form = _VirtualDom_node('form');
-var elm$html$Html$input = _VirtualDom_node('input');
-var elm$html$Html$label = _VirtualDom_node('label');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$json$Json$Encode$string = _Json_wrap;
@@ -4974,6 +4965,35 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var author$project$Main$feedbackDiv = function (model) {
+	var _n0 = model.H;
+	if (!_n0.$) {
+		var feedback = _n0.a;
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('alert alert-primary'),
+					author$project$Main$role('alert')
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text(feedback)
+				]));
+	} else {
+		return A2(elm$html$Html$div, _List_Nil, _List_Nil);
+	}
+};
+var author$project$Main$AddTerm = function (a) {
+	return {$: 0, a: a};
+};
+var author$project$Main$UpdateNewTerm = function (a) {
+	return {$: 2, a: a};
+};
+var elm$html$Html$button = _VirtualDom_node('button');
+var elm$html$Html$form = _VirtualDom_node('form');
+var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$label = _VirtualDom_node('label');
 var elm$html$Html$Attributes$for = elm$html$Html$Attributes$stringProperty('htmlFor');
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
@@ -5041,7 +5061,7 @@ var author$project$Main$termForm = function (model) {
 		_List_fromArray(
 			[
 				elm$html$Html$Events$onSubmit(
-				author$project$Main$AddTerm(model.v))
+				author$project$Main$AddTerm(model.u))
 			]),
 		_List_fromArray(
 			[
@@ -5072,7 +5092,7 @@ var author$project$Main$termForm = function (model) {
 								elm$html$Html$Attributes$placeholder('Add a new term'),
 								elm$html$Html$Attributes$id('newTermInput'),
 								elm$html$Html$Attributes$class('form-control'),
-								elm$html$Html$Attributes$value(model.v)
+								elm$html$Html$Attributes$value(model.u)
 							]),
 						_List_Nil)
 					])),
@@ -5082,7 +5102,7 @@ var author$project$Main$termForm = function (model) {
 					[
 						elm$html$Html$Attributes$type_('submit'),
 						elm$html$Html$Attributes$class('btn btn-primary'),
-						elm$html$Html$Attributes$value(model.v)
+						elm$html$Html$Attributes$value(model.u)
 					]),
 				_List_fromArray(
 					[
@@ -5148,55 +5168,6 @@ var author$project$Main$termsList = function (terms) {
 	return A2(elm$core$List$map, author$project$Main$termItem, terms);
 };
 var elm$html$Html$ol = _VirtualDom_node('ol');
-var author$project$Main$bingoCardWizard = function (model) {
-	var _n0 = model.W;
-	if (!_n0) {
-		return _List_fromArray(
-			[
-				A2(
-				elm$html$Html$ol,
-				_List_Nil,
-				author$project$Main$termsList(model.r)),
-				author$project$Main$termForm(model)
-			]);
-	} else {
-		return _List_fromArray(
-			[
-				elm$html$Html$text('My cool card')
-			]);
-	}
-};
-var elm$virtual_dom$VirtualDom$attribute = F2(
-	function (key, value) {
-		return A2(
-			_VirtualDom_attribute,
-			_VirtualDom_noOnOrFormAction(key),
-			_VirtualDom_noJavaScriptOrHtmlUri(value));
-	});
-var elm$html$Html$Attributes$attribute = elm$virtual_dom$VirtualDom$attribute;
-var author$project$Main$role = function (roleValue) {
-	return A2(elm$html$Html$Attributes$attribute, 'role', roleValue);
-};
-var author$project$Main$feedbackDiv = function (model) {
-	var _n0 = model.H;
-	if (!_n0.$) {
-		var feedback = _n0.a;
-		return A2(
-			elm$html$Html$div,
-			_List_fromArray(
-				[
-					elm$html$Html$Attributes$class('alert alert-primary'),
-					author$project$Main$role('alert')
-				]),
-			_List_fromArray(
-				[
-					elm$html$Html$text(feedback)
-				]));
-	} else {
-		return A2(elm$html$Html$div, _List_Nil, _List_Nil);
-	}
-};
-var elm$html$Html$p = _VirtualDom_node('p');
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -5204,22 +5175,25 @@ var author$project$Main$view = function (model) {
 			[
 				elm$html$Html$Attributes$class('container')
 			]),
-		_Utils_ap(
-			_List_fromArray(
-				[
-					author$project$Main$feedbackDiv(model),
-					A2(
-					elm$html$Html$p,
-					_List_fromArray(
-						[
-							elm$html$Html$Attributes$class('lead')
-						]),
-					_List_fromArray(
-						[
-							elm$html$Html$text('Add 24 terms to create your custom bingo card.')
-						]))
-				]),
-			author$project$Main$bingoCardWizard(model)));
+		_List_fromArray(
+			[
+				author$project$Main$feedbackDiv(model),
+				A2(
+				elm$html$Html$ol,
+				_List_Nil,
+				author$project$Main$termsList(model.w)),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('lead')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Add 24 terms to create your custom bingo card.')
+					])),
+				author$project$Main$termForm(model)
+			]));
 };
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
@@ -5341,7 +5315,7 @@ var elm$core$String$contains = _String_contains;
 var elm$core$String$toInt = _String_toInt;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {ab: fragment, ac: host, ag: path, ai: port_, al: protocol, am: query};
+		return {aa: fragment, ab: host, af: path, ah: port_, ak: protocol, al: query};
 	});
 var elm$url$Url$chompBeforePath = F5(
 	function (protocol, path, params, frag, str) {
@@ -5448,22 +5422,22 @@ var elm$url$Url$fromString = function (str) {
 var elm$browser$Browser$sandbox = function (impl) {
 	return _Browser_element(
 		{
-			aF: function (_n0) {
-				return _Utils_Tuple2(impl.aF, elm$core$Platform$Cmd$none);
+			aE: function (_n0) {
+				return _Utils_Tuple2(impl.aE, elm$core$Platform$Cmd$none);
 			},
-			aO: function (_n1) {
+			aN: function (_n1) {
 				return elm$core$Platform$Sub$none;
 			},
-			aQ: F2(
+			aP: F2(
 				function (msg, model) {
 					return _Utils_Tuple2(
-						A2(impl.aQ, msg, model),
+						A2(impl.aP, msg, model),
 						elm$core$Platform$Cmd$none);
 				}),
-			aS: impl.aS
+			aR: impl.aR
 		});
 };
 var author$project$Main$main = elm$browser$Browser$sandbox(
-	{aF: author$project$Main$init, aQ: author$project$Main$update, aS: author$project$Main$view});
+	{aE: author$project$Main$init, aP: author$project$Main$update, aR: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(0))(0)}});}(this));
