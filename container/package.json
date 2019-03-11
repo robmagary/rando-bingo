@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "elm": "0.19.0-bugfix2",
+    "elm-format": "0.8.1",
+    "elm-test": "0.19.0-rev3",
+    "elm-analyse": "0.15.1",
+    "watchy": "0.9.5"
+  }
+}
