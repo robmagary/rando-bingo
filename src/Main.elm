@@ -2,9 +2,10 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Array exposing (Array, empty, push, toList)
 import Browser
-import Html exposing (Attribute, Html, button, div, form, input, label, li, ol, p, text)
+import Html exposing (Attribute, Html, button, div, form, h1, input, label, li, ol, p, text)
 import Html.Attributes exposing (attribute, class, for, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
+import List.Extra as ListExtra
 
 
 main =
@@ -23,14 +24,20 @@ type WizardStep
 type alias Model =
     { newTerm : String
     , terms : List String
+    , termsRequired : Int
     , feedback : Maybe String
     , wizardStep : WizardStep
     }
 
 
+randomWordList : List String
+randomWordList =
+    [ "attraction", "satisfy", "direful", "fog", "alarm", "cross", "number", "gigantic", "worthless", "fuzzy", "abandoned", "conscious", "macabre", "rainstorm", "sheet", "act", "stone", "like", "rot", "guarantee", "powerful", "careful", "lamp", "dramatic", "frogs" ]
+
+
 init : Model
 init =
-    Model "" [] Nothing AddingTerms
+    Model "" randomWordList 25 Nothing AddingTerms
 
 
 
@@ -60,12 +67,11 @@ update msg model =
         UpdateNewTerm updatedTerm ->
             let
                 wizardStep =
-                    case List.length model.terms of
-                        24 ->
-                            GeneratingCard
+                    if List.length model.terms >= model.termsRequired then
+                        GeneratingCard
 
-                        _ ->
-                            AddingTerms
+                    else
+                        AddingTerms
             in
             { model
                 | newTerm = updatedTerm
@@ -101,17 +107,21 @@ role roleValue =
 
 view : Model -> Html Msg
 view model =
+    let
+        remainingTermNumber =
+            String.fromInt <| model.termsRequired - List.length model.terms
+    in
     div [ class "container" ]
-        ([ feedbackDiv model
-         , p [ class "lead" ] [ text "Add 24 terms to create your custom bingo card." ]
+        ([ feedbackDiv model.feedback
+         , p [ class "lead" ] [ text <| "Add " ++ remainingTermNumber ++ " terms to create your custom bingo card." ]
          ]
             ++ bingoCardWizard model
         )
 
 
-feedbackDiv : Model -> Html msg
-feedbackDiv model =
-    case model.feedback of
+feedbackDiv : Maybe String -> Html msg
+feedbackDiv maybeFeedback =
+    case maybeFeedback of
         Just feedback ->
             div [ class "alert alert-primary", role "alert" ] [ text feedback ]
 
@@ -123,28 +133,63 @@ bingoCardWizard : Model -> List (Html Msg)
 bingoCardWizard model =
     case model.wizardStep of
         AddingTerms ->
-            [ ol [] (termsList model.terms)
+            [ ol []
+                (List.map
+                    (\term ->
+                        li []
+                            [ button
+                                [ onClick (RemoveTerm term)
+                                , class "btn btn-link"
+                                ]
+                                [ text term ]
+                            ]
+                    )
+                    model.terms
+                )
             , termForm model
             ]
 
         GeneratingCard ->
-            [ text "My cool card" ]
+            let
+                sqrtOfRequiredTerms =
+                    model.termsRequired
+                        |> toFloat
+                        |> sqrt
+                        |> round
 
+                listOfTermsLists =
+                    ListExtra.groupsOf sqrtOfRequiredTerms model.terms
 
-termsList : List String -> List (Html Msg)
-termsList terms =
-    List.map termItem terms
+                termColumn term =
+                    div
+                        [ class "col" ]
+                        [ text term ]
 
+                termRow termList =
+                    div
+                        [ class "row" ]
+                        (List.map
+                            termColumn
+                            termList
+                        )
 
-termItem : String -> Html Msg
-termItem term =
-    li []
-        [ button
-            [ onClick (RemoveTerm term)
-            , class "btn btn-link"
-            ]
-            [ text term ]
-        ]
+                columnsForEachRow =
+                    List.repeat
+                        sqrtOfRequiredTerms
+                        (div
+                            [ class "col" ]
+                            [ text "term" ]
+                        )
+
+                rowsWithColumns =
+                    List.repeat
+                        sqrtOfRequiredTerms
+                        (div
+                            [ class "row" ]
+                            columnsForEachRow
+                        )
+            in
+            [ h1 [] [ text "Your Card" ] ] ++ List.map termRow listOfTermsLists
 
 
 termForm : Model -> Html Msg
