@@ -6,10 +6,11 @@ import Html exposing (Attribute, Html, button, div, form, h1, input, label, li, 
 import Html.Attributes exposing (attribute, class, for, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import List.Extra as ListExtra
+import Random
 
 
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element { init = init, update = update, view = view, subscriptions = subscriptions }
 
 
 
@@ -30,14 +31,19 @@ type alias Model =
     }
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
 randomWordList : List String
 randomWordList =
     [ "attraction", "satisfy", "direful", "fog", "alarm", "cross", "number", "gigantic", "worthless", "fuzzy", "abandoned", "conscious", "macabre", "rainstorm", "sheet", "act", "stone", "like", "rot", "guarantee", "powerful", "careful", "lamp", "dramatic", "frogs" ]
 
 
-init : Model
-init =
-    Model "" randomWordList 25 Nothing AddingTerms
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Model "" randomWordList 25 Nothing AddingTerms, Cmd.none )
 
 
 
@@ -48,21 +54,24 @@ type Msg
     = AddTerm String
     | RemoveTerm String
     | UpdateNewTerm String
+    | RandomList (List Int)
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddTerm newTerm ->
             if termIsUnique model then
-                { model
+                ( { model
                     | newTerm = ""
                     , terms = newTerm :: model.terms
                     , feedback = Nothing
-                }
+                  }
+                , Cmd.none
+                )
 
             else
-                { model | feedback = Just "Each term can only be used once." }
+                ( { model | feedback = Just "Each term can only be used once." }, Cmd.none )
 
         UpdateNewTerm updatedTerm ->
             let
@@ -73,18 +82,41 @@ update msg model =
                     else
                         AddingTerms
             in
-            { model
+            ( { model
                 | newTerm = updatedTerm
                 , feedback = Nothing
                 , wizardStep = wizardStep
-            }
+              }
+            , Cmd.none
+            )
 
         RemoveTerm existingTerm ->
             let
                 updatedTerms =
                     List.filter (\term -> not (term == existingTerm)) model.terms
             in
-            { model | terms = updatedTerms }
+            ( { model | terms = updatedTerms }, Cmd.none )
+
+        RandomList list ->
+            ( model, Cmd.none )
+
+
+
+-- UPDATE HELPERS
+
+
+randomListGenerator : List String -> Random.Generator (List Int)
+randomListGenerator terms =
+    let
+        numberOfTerms =
+            List.length terms
+    in
+    Random.list numberOfTerms (Random.int 0 (numberOfTerms - 1))
+
+
+generateRandomList : List String -> Cmd Msg
+generateRandomList terms =
+    Random.generate RandomList (randomListGenerator terms)
 
 
 termIsUnique : Model -> Bool
