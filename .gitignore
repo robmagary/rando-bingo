@@ -1,3 +1,5 @@
 # Elm's work dir
 elm-stuff
 node_modules
+dist/elm-app.js
+output/elm-app.js
