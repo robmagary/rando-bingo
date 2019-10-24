@@ -7,6 +7,7 @@ import Html.Attributes exposing (attribute, class, for, id, placeholder, type_, 
 import Html.Events exposing (onClick, onInput, onSubmit)
 import List.Extra as ListExtra
 import Random
+import Random.List as RandomList
 
 
 main =
@@ -54,7 +55,8 @@ type Msg
     = AddTerm String
     | RemoveTerm String
     | UpdateNewTerm String
-    | RandomList (List Int)
+    | RandomizeTerms
+    | RandomList (List String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -97,26 +99,25 @@ update msg model =
             in
             ( { model | terms = updatedTerms }, Cmd.none )
 
-        RandomList list ->
-            ( model, Cmd.none )
+        RandomizeTerms ->
+            ( model, generateRandomList model.terms )
+
+        RandomList randomizedTerms ->
+            ( { model | terms = randomizedTerms }, Cmd.none )
 
 
 
 -- UPDATE HELPERS
 
 
-randomListGenerator : List String -> Random.Generator (List Int)
-randomListGenerator terms =
-    let
-        numberOfTerms =
-            List.length terms
-    in
-    Random.list numberOfTerms (Random.int 0 (numberOfTerms - 1))
+shuffleListGenerator : List String -> Random.Generator (List String)
+shuffleListGenerator list =
+    RandomList.shuffle list
 
 
 generateRandomList : List String -> Cmd Msg
 generateRandomList terms =
-    Random.generate RandomList (randomListGenerator terms)
+    Random.generate RandomList (shuffleListGenerator terms)
 
 
 termIsUnique : Model -> Bool
@@ -221,7 +222,10 @@ bingoCardWizard model =
                             columnsForEachRow
                         )
             in
-            [ h1 [] [ text "Your Card" ] ] ++ List.map termRow listOfTermsLists
+            [ h1 [] [ text "Your Card" ]
+            , button [ onClick RandomizeTerms ] [ text "Randomize your card" ]
+            ]
+                ++ List.map termRow listOfTermsLists
 
 
 termForm : Model -> Html Msg
