@@ -7,3 +7,11 @@ services:
         - ./dist:/work/output/:delegated
       working_dir: /work
       command: watch.sh build.sh
+  server:
+      build: containers/server
+      volumes:
+        - ./server:/opt/server:delegated
+      working_dir: /opt/server
+      ports:
+        - 8080:8080
+      command: stack exec spock-app-exe
