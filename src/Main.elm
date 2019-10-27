@@ -6,10 +6,12 @@ import Html exposing (Attribute, Html, button, div, form, h1, input, label, li, 
 import Html.Attributes exposing (attribute, class, for, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import List.Extra as ListExtra
+import Random
+import Random.List as RandomList
 
 
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element { init = init, update = update, view = view, subscriptions = subscriptions }
 
 
 
@@ -30,14 +32,19 @@ type alias Model =
     }
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
 randomWordList : List String
 randomWordList =
     [ "attraction", "satisfy", "direful", "fog", "alarm", "cross", "number", "gigantic", "worthless", "fuzzy", "abandoned", "conscious", "macabre", "rainstorm", "sheet", "act", "stone", "like", "rot", "guarantee", "powerful", "careful", "lamp", "dramatic", "frogs" ]
 
 
-init : Model
-init =
-    Model "" randomWordList 25 Nothing AddingTerms
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Model "" randomWordList 25 Nothing AddingTerms, Cmd.none )
 
 
 
@@ -48,21 +55,25 @@ type Msg
     = AddTerm String
     | RemoveTerm String
     | UpdateNewTerm String
+    | RandomizeTerms
+    | RandomList (List String)
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddTerm newTerm ->
             if termIsUnique model then
-                { model
+                ( { model
                     | newTerm = ""
                     , terms = newTerm :: model.terms
                     , feedback = Nothing
-                }
+                  }
+                , Cmd.none
+                )
 
             else
-                { model | feedback = Just "Each term can only be used once." }
+                ( { model | feedback = Just "Each term can only be used once." }, Cmd.none )
 
         UpdateNewTerm updatedTerm ->
             let
@@ -73,18 +84,40 @@ update msg model =
                     else
                         AddingTerms
             in
-            { model
+            ( { model
                 | newTerm = updatedTerm
                 , feedback = Nothing
                 , wizardStep = wizardStep
-            }
+              }
+            , Cmd.none
+            )
 
         RemoveTerm existingTerm ->
             let
                 updatedTerms =
                     List.filter (\term -> not (term == existingTerm)) model.terms
             in
-            { model | terms = updatedTerms }
+            ( { model | terms = updatedTerms }, Cmd.none )
+
+        RandomizeTerms ->
+            ( model, generateRandomList model.terms )
+
+        RandomList randomizedTerms ->
+            ( { model | terms = randomizedTerms }, Cmd.none )
+
+
+
+-- UPDATE HELPERS
+
+
+shuffleListGenerator : List String -> Random.Generator (List String)
+shuffleListGenerator list =
+    RandomList.shuffle list
+
+
+generateRandomList : List String -> Cmd Msg
+generateRandomList terms =
+    Random.generate RandomList (shuffleListGenerator terms)
 
 
 termIsUnique : Model -> Bool
@@ -189,7 +222,10 @@ bingoCardWizard model =
                             columnsForEachRow
                         )
             in
-            [ h1 [] [ text "Your Card" ] ] ++ List.map termRow listOfTermsLists
+            [ h1 [] [ text "Your Card" ]
+            , button [ onClick RandomizeTerms ] [ text "Randomize your card" ]
+            ]
+                ++ List.map termRow listOfTermsLists
 
 
 termForm : Model -> Html Msg
