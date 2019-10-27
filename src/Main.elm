@@ -1,17 +1,23 @@
-module Main exposing (Model, Msg(..), init, main, update, view)
+module Main exposing (Model, Msg(..), init, main, update)
 
 import Array exposing (Array, empty, push, toList)
+import BrandColors exposing (..)
 import Browser
-import Html exposing (Attribute, Html, button, div, form, h1, input, label, li, ol, p, text)
-import Html.Attributes exposing (attribute, class, for, id, placeholder, type_, value)
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Data exposing (randomWordList)
+import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
+import Element.Input as Input
+import Html exposing (Html)
 import List.Extra as ListExtra
 import Random
 import Random.List as RandomList
+import UiHelpers exposing (onInputEnterKey)
 
 
 main =
-    Browser.element { init = init, update = update, view = view, subscriptions = subscriptions }
+    Browser.element { init = init, update = update, view = elementView, subscriptions = subscriptions }
 
 
 
@@ -37,14 +43,32 @@ subscriptions model =
     Sub.none
 
 
-randomWordList : List String
-randomWordList =
-    [ "attraction", "satisfy", "direful", "fog", "alarm", "cross", "number", "gigantic", "worthless", "fuzzy", "abandoned", "conscious", "macabre", "rainstorm", "sheet", "act", "stone", "like", "rot", "guarantee", "powerful", "careful", "lamp", "dramatic", "frogs" ]
-
-
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model "" randomWordList 25 Nothing AddingTerms, Cmd.none )
+    let
+        initialModel =
+            Model "" randomWordList 25 Nothing AddingTerms
+    in
+    ( setWizardStep initialModel, Cmd.none )
+
+
+setWizardStep : Model -> Model
+setWizardStep modelToSet =
+    let
+        numberOfTerms =
+            List.length modelToSet.terms
+
+        termsRequired =
+            modelToSet.termsRequired
+
+        wizardStep =
+            if numberOfTerms >= termsRequired then
+                GeneratingCard
+
+            else
+                AddingTerms
+    in
+    { modelToSet | wizardStep = wizardStep }
 
 
 
@@ -52,7 +76,7 @@ init _ =
 
 
 type Msg
-    = AddTerm String
+    = AddTerm
     | RemoveTerm String
     | UpdateNewTerm String
     | RandomizeTerms
@@ -62,32 +86,28 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AddTerm newTerm ->
+        AddTerm ->
             if termIsUnique model then
-                ( { model
-                    | newTerm = ""
-                    , terms = newTerm :: model.terms
-                    , feedback = Nothing
-                  }
-                , Cmd.none
-                )
+                let
+                    termInModel =
+                        { model
+                            | newTerm = ""
+                            , terms = model.newTerm :: model.terms
+                            , feedback = Nothing
+                        }
+
+                    updatedModel =
+                        setWizardStep termInModel
+                in
+                ( updatedModel, Cmd.none )
 
             else
                 ( { model | feedback = Just "Each term can only be used once." }, Cmd.none )
 
         UpdateNewTerm updatedTerm ->
-            let
-                wizardStep =
-                    if List.length model.terms >= model.termsRequired then
-                        GeneratingCard
-
-                    else
-                        AddingTerms
-            in
             ( { model
                 | newTerm = updatedTerm
                 , feedback = Nothing
-                , wizardStep = wizardStep
               }
             , Cmd.none
             )
@@ -127,121 +147,164 @@ termIsUnique model =
 
 
 -- VIEW HELPERS
-
-
-role : String -> Attribute msg
-role roleValue =
-    attribute "role" roleValue
-
-
-
+-- role : String -> Attribute msg
+-- role roleValue =
+--     attribute "role" roleValue
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
-    let
-        remainingTermNumber =
-            String.fromInt <| model.termsRequired - List.length model.terms
-    in
-    div [ class "container" ]
-        ([ feedbackDiv model.feedback
-         , p [ class "lead" ] [ text <| "Add " ++ remainingTermNumber ++ " terms to create your custom bingo card." ]
-         ]
-            ++ bingoCardWizard model
-        )
+elementView : Model -> Html Msg
+elementView model =
+    layout
+        [ Background.color rgbNuetral ]
+    <|
+        column
+            [ width (fill |> maximum 800)
+            , centerX
+            ]
+            [ wrappedRow
+                [ width fill ]
+                [ el
+                    [ Font.color rgbFontMain
+                    , Font.size 50
+                    , Font.bold
+                    , paddingXY 0 20
+                    ]
+                    (text "Rando-Bingo")
+                ]
+            , feedbackElmnt model.feedback
+            , bingoCardWizard model
+            ]
 
 
-feedbackDiv : Maybe String -> Html msg
-feedbackDiv maybeFeedback =
+feedbackElmnt : Maybe String -> Element msg
+feedbackElmnt maybeFeedback =
     case maybeFeedback of
         Just feedback ->
-            div [ class "alert alert-primary", role "alert" ] [ text feedback ]
+            wrappedRow
+                [ width fill ]
+                [ el
+                    [ width fill
+                    , Background.color rgbPrimary
+                    , Border.color <| darkenColor rgbPrimary 0.75
+                    , Border.width 1
+                    , Border.rounded 2
+                    , padding 10
+                    ]
+                  <|
+                    text feedback
+                ]
 
         Nothing ->
-            div [] []
+            none
 
 
-bingoCardWizard : Model -> List (Html Msg)
+bingoCardWizard : Model -> Element Msg
 bingoCardWizard model =
     case model.wizardStep of
         AddingTerms ->
-            [ ol []
-                (List.map
-                    (\term ->
-                        li []
-                            [ button
-                                [ onClick (RemoveTerm term)
-                                , class "btn btn-link"
-                                ]
-                                [ text term ]
-                            ]
-                    )
-                    model.terms
-                )
-            , termForm model
-            ]
-
-        GeneratingCard ->
-            let
-                sqrtOfRequiredTerms =
-                    model.termsRequired
-                        |> toFloat
-                        |> sqrt
-                        |> round
-
-                listOfTermsLists =
-                    ListExtra.groupsOf sqrtOfRequiredTerms model.terms
-
-                termColumn term =
-                    div
-                        [ class "col" ]
-                        [ text term ]
-
-                termRow termList =
-                    div
-                        [ class "row" ]
-                        (List.map
-                            termColumn
-                            termList
-                        )
-
-                columnsForEachRow =
-                    List.repeat
-                        sqrtOfRequiredTerms
-                        (div
-                            [ class "col" ]
-                            [ text "term" ]
-                        )
-
-                rowsWithColumns =
-                    List.repeat
-                        sqrtOfRequiredTerms
-                        (div
-                            [ class "row" ]
-                            columnsForEachRow
-                        )
-            in
-            [ h1 [] [ text "Your Card" ]
-            , button [ onClick RandomizeTerms ] [ text "Randomize your card" ]
-            ]
-                ++ List.map termRow listOfTermsLists
-
-
-termForm : Model -> Html Msg
-termForm model =
-    form [ onSubmit (AddTerm model.newTerm) ]
-        [ div [ class "form-group" ]
-            [ label [ for "newTermInput" ] [ text "New Term" ]
-            , input
-                [ type_ "text"
-                , onInput UpdateNewTerm
-                , placeholder "Add a new term"
-                , id "newTermInput"
-                , class "form-control"
-                , value model.newTerm
+            column
+                [ width fill
+                , spacing 10
+                , paddingXY 0 20
                 ]
-                []
+                [ termInput model, termsList model ]
+
+        --
+        GeneratingCard ->
+            bingoCards model
+
+
+termInput : Model -> Element Msg
+termInput model =
+    el [ width fill ]
+        (Input.text
+            [ onInputEnterKey AddTerm ]
+            { onChange = UpdateNewTerm
+            , text = model.newTerm
+            , placeholder = Nothing
+            , label = Input.labelHidden "Add a new term"
+            }
+        )
+
+
+termsList : Model -> Element Msg
+termsList model =
+    wrappedRow
+        [ width fill
+        , spacingXY 20 10
+        ]
+        (el [] (text "Your Terms:")
+            :: List.map
+                (\term ->
+                    el [] <|
+                        Input.button
+                            []
+                            { onPress = Just (RemoveTerm term)
+                            , label = text term
+                            }
+                )
+                model.terms
+        )
+
+
+bingoCards : Model -> Element Msg
+bingoCards model =
+    let
+        sqrtOfRequiredTerms =
+            model.termsRequired
+                |> toFloat
+                |> sqrt
+                |> round
+
+        listOfTermsLists =
+            ListExtra.groupsOf sqrtOfRequiredTerms model.terms
+
+        termColumn term =
+            column
+                [ width fill ]
+                [ el
+                    [ width fill
+                    , Font.center
+                    , paddingXY 0 30
+                    , Background.color white
+                    , Border.color <| darkenColor rgbHighlight2 0.75
+                    , Border.width 1
+                    ]
+                    (text term)
+                ]
+
+        termRow termList =
+            row
+                [ width fill
+                ]
+                (List.map
+                    termColumn
+                    termList
+                )
+    in
+    column
+        [ width fill ]
+        [ row
+            [ width fill
+            , paddingXY 0 20
             ]
-        , button [ type_ "submit", class "btn btn-primary", value model.newTerm ] [ text "Add" ]
+            [ el [ alignLeft ] (text "Your Card")
+            , Input.button
+                [ alignRight
+                , Font.color white
+                , Background.color rgbPrimary
+                , Border.color <| darkenColor rgbPrimary 0.75
+                , Border.width 1
+                , Border.rounded 2
+                , paddingXY 5 10
+                ]
+                { onPress = Just RandomizeTerms
+                , label = text "Randomize"
+                }
+            ]
+        , row [ width fill ]
+            [ column [ width fill ] <|
+                List.map termRow listOfTermsLists
+            ]
         ]
