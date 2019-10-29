@@ -1,7 +1,8 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Rando Bing</title>
     <script type="text/javascript" src="elm-app.js"></script>
   </head>
@@ -9,7 +10,11 @@
     <div id="elm"></div>
     <script>
     var app = Elm.Main.init({
-      node: document.getElementById('elm')
+      node: document.getElementById('elm'),
+      flags: {
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
     });
     </script>
   </body>
