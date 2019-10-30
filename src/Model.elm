@@ -3,6 +3,16 @@ module Model exposing (Flags, Model, Msg(..), WizardStep(..))
 import Responsive exposing (Container, ScreenSize(..))
 
 
+type alias Model =
+    { newTerm : String
+    , terms : List String
+    , cardColumns : Int
+    , feedback : Maybe String
+    , wizardStep : WizardStep
+    , uiContainer : Container
+    }
+
+
 type Msg
     = AddTerm
     | RemoveTerm String
@@ -15,16 +25,6 @@ type Msg
 type WizardStep
     = AddingTerms
     | GeneratingCard
-
-
-type alias Model =
-    { newTerm : String
-    , terms : List String
-    , termsRequired : Int
-    , feedback : Maybe String
-    , wizardStep : WizardStep
-    , uiContainer : Container
-    }
 
 
 type alias Flags =

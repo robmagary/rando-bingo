@@ -150,27 +150,22 @@ termsList model =
 bingoCards : Model -> Element Msg
 bingoCards model =
     let
-        sqrtOfRequiredTerms =
-            model.termsRequired
-                |> toFloat
-                |> sqrt
-                |> round
+        cardColumns =
+            model.cardColumns
         
         containerWidthFloat =
             toFloat model.uiContainer.width
 
         termSpacing =
-            ( containerWidthFloat / ( toFloat sqrtOfRequiredTerms ) ) / 3
+            ( containerWidthFloat / ( toFloat cardColumns ) ) / 3
                 |> round
 
         termFontSize =
             ( toFloat termSpacing) / 3
                 |> round
 
-
-
         listOfTermsLists =
-            ListExtra.groupsOf sqrtOfRequiredTerms model.terms
+            ListExtra.groupsOf cardColumns model.terms
 
         termColumn term =
             column

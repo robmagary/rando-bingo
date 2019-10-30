@@ -35,7 +35,7 @@ init flags =
             Container initialScreenSize flags.width
 
         initialModel =
-            Model "" randomWordList 25 Nothing AddingTerms uContainer
+            Model "" randomWordList 5 Nothing AddingTerms uContainer
     in
     ( setWizardStep initialModel, Cmd.none )
 
@@ -47,7 +47,7 @@ setWizardStep modelToSet =
             List.length modelToSet.terms
 
         termsRequired =
-            modelToSet.termsRequired
+            modelToSet.cardColumns * modelToSet.cardColumns
 
         wizardStep =
             if numberOfTerms >= termsRequired then
