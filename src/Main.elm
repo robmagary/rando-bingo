@@ -7,7 +7,7 @@ import Data exposing (randomWordList)
 import Model exposing (Flags, Model, Msg(..), WizardStep(..))
 import Random
 import Random.List as RandomList
-import Responsive exposing (ScreenSize(..), containerWidth, widthToScreenSize)
+import Responsive exposing (Container, ScreenSize(..), containerWidth, widthToScreenSize)
 import View exposing (elementView)
 
 
@@ -17,7 +17,7 @@ main =
 
 updateScreenSize : Int -> Int -> Msg
 updateScreenSize width _ =
-    SetScreenSize (widthToScreenSize width)
+    SetScreenSize (widthToScreenSize width) width
 
 
 subscriptions : Model -> Sub Msg
@@ -30,9 +30,12 @@ init flags =
     let
         initialScreenSize =
             widthToScreenSize flags.width
+        
+        uContainer =
+            Container initialScreenSize flags.width
 
         initialModel =
-            Model "" randomWordList 25 Nothing AddingTerms initialScreenSize
+            Model "" randomWordList 25 Nothing AddingTerms uContainer
     in
     ( setWizardStep initialModel, Cmd.none )
 
@@ -102,8 +105,13 @@ update msg model =
         RandomList randomizedTerms ->
             ( { model | terms = randomizedTerms }, Cmd.none )
 
-        SetScreenSize newScreenSize ->
-            ( { model | screenSize = newScreenSize }, Cmd.none )
+        SetScreenSize newScreenSize width ->
+            (
+                { model
+                    | uiContainer = ( Container newScreenSize width )
+                }
+                , Cmd.none
+            )
 
 
 
