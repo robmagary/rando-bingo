@@ -1,4 +1,4 @@
-module Responsive exposing (ScreenSize(..), containerWidth, widthToScreenSize)
+module Responsive exposing (Container, ScreenSize(..), containerWidth, widthToScreenSize)
 
 import Element exposing (..)
 
@@ -39,9 +39,9 @@ widthToScreenSize width =
         LargeDesktopWidth
 
 
-containerWidth : ScreenSize -> Attribute msg
-containerWidth screenSize =
-    case screenSize of
+containerWidth : Container -> Attribute msg
+containerWidth container =
+    case container.screenSize of
         PhoneWidth ->
             width fill
 

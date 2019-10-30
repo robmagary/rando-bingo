@@ -9,7 +9,7 @@ import Element.Input as Input
 import Html exposing (Html)
 import List.Extra as ListExtra
 import Model exposing (Model, Msg(..), WizardStep(..))
-import Responsive exposing (ScreenSize(..), containerWidth)
+import Responsive exposing (Container, ScreenSize(..), containerWidth)
 import UiHelpers exposing (onInputEnterKey)
 
 
@@ -19,7 +19,7 @@ elementView model =
         [ Background.color rgbNuetral ]
     <|
         column
-            [ containerWidth model.screenSize
+            [ containerWidth model.uiContainer
             , centerX
             ]
             [ wrappedRow
@@ -32,17 +32,17 @@ elementView model =
                     ]
                     (text "Rando-Bingo")
                 ]
-            , screenSizeSpy model.screenSize
+            , screenSizeSpy model.uiContainer
             , feedbackElmnt model.feedback
             , bingoCardWizard model
             ]
 
 
-screenSizeSpy : ScreenSize -> Element msg
-screenSizeSpy screenSize =
+screenSizeSpy : Container -> Element msg
+screenSizeSpy container =
     let
         screenSizeText =
-            case screenSize of
+            case container.screenSize of
                 PhoneWidth ->
                     "Phone"
 
@@ -155,22 +155,43 @@ bingoCards model =
                 |> toFloat
                 |> sqrt
                 |> round
+        
+        containerWidthFloat =
+            toFloat model.uiContainer.width
+
+        termSpacing =
+            ( containerWidthFloat / ( toFloat sqrtOfRequiredTerms ) ) / 3
+                |> round
+
+        termFontSize =
+            ( toFloat termSpacing) / 3
+                |> round
+
+
 
         listOfTermsLists =
             ListExtra.groupsOf sqrtOfRequiredTerms model.terms
 
         termColumn term =
             column
-                [ width fill ]
-                [ el
+                [ width fill
+                , paddingXY 0 termSpacing
+                , Background.color white
+                , Border.color <| darkenColor rgbHighlight2 0.75
+                , Border.width 1
+                ]
+                [ paragraph
                     [ width fill
                     , Font.center
-                    , paddingXY 0 30
-                    , Background.color white
-                    , Border.color <| darkenColor rgbHighlight2 0.75
-                    , Border.width 1
+                    , Font.size termFontSize
                     ]
-                    (text term)
+                    [ el
+                        [ width fill
+                        
+                        ]
+                        (text term)
+                    ]
+
                 ]
 
         termRow termList =
