@@ -1,6 +1,6 @@
 module Model exposing (Flags, Model, Msg(..), WizardStep(..))
 
-import Responsive exposing (Container, ScreenSize(..))
+import Responsive exposing (ScreenSize(..))
 
 
 type Msg
@@ -9,7 +9,7 @@ type Msg
     | UpdateNewTerm String
     | RandomizeTerms
     | RandomList (List String)
-    | SetScreenSize ScreenSize Int
+    | SetScreenSize ScreenSize
 
 
 type WizardStep
@@ -23,7 +23,7 @@ type alias Model =
     , termsRequired : Int
     , feedback : Maybe String
     , wizardStep : WizardStep
-    , uiContainer : Container
+    , screenSize : ScreenSize
     }
 
 
