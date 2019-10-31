@@ -8,7 +8,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
 import List.Extra as ListExtra
-import Model exposing (Model, Msg(..), WizardStep(..))
+import Model exposing (Model, Msg(..), Term, WizardStep(..), unwrapTerm)
 import Responsive exposing (Container, ScreenSize(..), containerWidth)
 import UiHelpers exposing (onInputEnterKey)
 
@@ -140,7 +140,7 @@ termsList model =
                         Input.button
                             []
                             { onPress = Just (RemoveTerm term)
-                            , label = text term
+                            , label = text <| unwrapTerm term
                             }
                 )
                 model.terms
@@ -160,43 +160,9 @@ bingoCards model =
             ( containerWidthFloat / ( toFloat cardColumns ) ) / 3
                 |> round
 
-        termFontSize =
-            ( toFloat termSpacing) / 3
-                |> round
-
         listOfTermsLists =
             ListExtra.groupsOf cardColumns model.terms
 
-        termColumn term =
-            column
-                [ width fill
-                , paddingXY 0 termSpacing
-                , Background.color white
-                , Border.color <| darkenColor rgbHighlight2 0.75
-                , Border.width 1
-                ]
-                [ paragraph
-                    [ width fill
-                    , Font.center
-                    , Font.size termFontSize
-                    ]
-                    [ el
-                        [ width fill
-                        
-                        ]
-                        (text term)
-                    ]
-
-                ]
-
-        termRow termList =
-            row
-                [ width fill
-                ]
-                (List.map
-                    termColumn
-                    termList
-                )
     in
     column
         [ width fill ]
@@ -220,6 +186,72 @@ bingoCards model =
             ]
         , row [ width fill ]
             [ column [ width fill ] <|
-                List.map termRow listOfTermsLists
+                List.indexedMap
+                    (\index term ->
+                        termRow termSpacing index term
+                    )
+                    listOfTermsLists
             ]
+        ]
+
+
+termRow : Int -> Int -> List Term -> Element Msg
+termRow termSpacing rowIndex termList =
+    let
+        cardColumns =   
+            List.length termList
+        
+        centerColumnIndex =
+            ((cardColumns + 1) // 2) - 1
+        
+        isCenterRow =
+            centerColumnIndex == rowIndex
+    in
+    row
+        [ width fill
+        ]
+        (List.indexedMap
+            (\columnIndex term ->
+                let
+                    isCenterColumn =
+                        centerColumnIndex == columnIndex && isCenterRow
+                in
+                termColumn isCenterColumn termSpacing term
+            )
+            termList
+        )
+
+
+termColumn : Bool -> Int -> Term -> Element Msg
+termColumn isCenterColumn termSpacing term =
+    let
+        termFontSize =
+            ( toFloat termSpacing) / 3
+                |> round
+        
+        termOrFree =
+            if isCenterColumn then
+                "FREE"
+            else
+                unwrapTerm term
+    in
+    column
+        [ width fill
+        , paddingXY 0 termSpacing
+        , Background.color white
+        , Border.color <| darkenColor rgbHighlight2 0.75
+        , Border.width 1
+        ]
+        [ paragraph
+            [ width fill
+            , Font.center
+            , Font.size termFontSize
+            ]
+            [ el
+                [ width fill
+                
+                ]
+                (text termOrFree)
+            ]
+
         ]

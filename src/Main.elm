@@ -4,7 +4,7 @@ import Array exposing (Array, empty, push, toList)
 import Browser
 import Browser.Events exposing (onResize)
 import Data exposing (randomWordList)
-import Model exposing (Flags, Model, Msg(..), WizardStep(..))
+import Model exposing (Flags, Model, Msg(..), Term(..), WizardStep(..))
 import Random
 import Random.List as RandomList
 import Responsive exposing (Container, ScreenSize(..), containerWidth, widthToScreenSize)
@@ -25,6 +25,15 @@ subscriptions model =
     Sub.batch [ onResize updateScreenSize ]
 
 
+randomTermsList : List String -> List Term
+randomTermsList wordList =
+    List.map
+        (\word ->
+            Term word
+        )
+        wordList
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
@@ -35,7 +44,7 @@ init flags =
             Container initialScreenSize flags.width
 
         initialModel =
-            Model "" randomWordList 5 Nothing AddingTerms uContainer
+            Model "" (randomTermsList randomWordList) 5 Nothing AddingTerms uContainer
     in
     ( setWizardStep initialModel, Cmd.none )
 
@@ -69,10 +78,13 @@ update msg model =
         AddTerm ->
             if termIsUnique model then
                 let
+                    newTerm =
+                        Term model.newTerm
+                    
                     termInModel =
                         { model
                             | newTerm = ""
-                            , terms = model.newTerm :: model.terms
+                            , terms = newTerm :: model.terms
                             , feedback = Nothing
                         }
 
@@ -118,16 +130,20 @@ update msg model =
 -- UPDATE HELPERS
 
 
-shuffleListGenerator : List String -> Random.Generator (List String)
+shuffleListGenerator : List Term -> Random.Generator (List Term)
 shuffleListGenerator list =
     RandomList.shuffle list
 
 
-generateRandomList : List String -> Cmd Msg
+generateRandomList : List Term -> Cmd Msg
 generateRandomList terms =
     Random.generate RandomList (shuffleListGenerator terms)
 
 
 termIsUnique : Model -> Bool
 termIsUnique model =
-    not (List.member model.newTerm model.terms)
+    let
+        newTerm =
+            Term model.newTerm
+    in
+    not (List.member newTerm model.terms)
