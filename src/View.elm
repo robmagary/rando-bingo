@@ -32,48 +32,9 @@ elementView model =
                     ]
                     (text "Rando-Bingo")
                 ]
-            , screenSizeSpy model.uiContainer
             , feedbackElmnt model.feedback
             , bingoCardWizard model
             ]
-
-
-screenSizeSpy : Container -> Element msg
-screenSizeSpy container =
-    let
-        screenSizeText =
-            case container.screenSize of
-                PhoneWidth ->
-                    "Phone"
-
-                PhabletWidth ->
-                    "Phablet"
-
-                TabletWidth ->
-                    "Tablet"
-
-                LaptopWidth ->
-                    "Laptop"
-
-                DesktopWidth ->
-                    "Desktop"
-
-                LargeDesktopWidth ->
-                    "LargeDesktop"
-    in
-    wrappedRow
-        [ width fill ]
-        [ el
-            [ width fill
-            , Background.color rgbPrimary
-            , Border.color <| darkenColor rgbPrimary 0.75
-            , Border.width 1
-            , Border.rounded 2
-            , padding 10
-            ]
-          <|
-            text ("Screen Size:" ++ screenSizeText)
-        ]
 
 
 feedbackElmnt : Maybe String -> Element msg
