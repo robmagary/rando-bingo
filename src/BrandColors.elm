@@ -1,6 +1,6 @@
 module BrandColors exposing (..)
 
-import Element exposing (Color, fromRgb, rgb255, toRgb)
+import Element exposing (Color, fromRgb, rgba, rgb255, toRgb)
 
 
 darkenColor : Color -> Float -> Color
@@ -46,6 +46,10 @@ white : Color
 white =
     rgb255 255 255 255
 
+
+transparentRgba : Color
+transparentRgba =
+    rgba 0 0 0 0
 
 
 -- TYPOGRAPHY

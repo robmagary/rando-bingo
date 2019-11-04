@@ -44,7 +44,7 @@ init flags =
             Container initialScreenSize flags.width
 
         initialModel =
-            Model "" (randomTermsList randomWordList) 5 Nothing AddingTerms uContainer
+            Model "" (randomTermsList randomWordList) 5 Nothing AddingTerms uContainer []
     in
     ( setWizardStep initialModel, Cmd.none )
 
@@ -111,11 +111,11 @@ update msg model =
             in
             ( { model | terms = updatedTerms }, Cmd.none )
 
-        RandomizeTerms ->
+        NewRandomizeTerms ->
             ( model, generateRandomList model.terms )
 
         RandomList randomizedTerms ->
-            ( { model | terms = randomizedTerms }, Cmd.none )
+            ( { model | cards = randomizedTerms :: model.cards }, Cmd.none )
 
         SetScreenSize newScreenSize width ->
             (

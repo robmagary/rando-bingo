@@ -10,6 +10,7 @@ type alias Model =
     , feedback : Maybe String
     , wizardStep : WizardStep
     , uiContainer : Container
+    , cards : List (List Term)
     }
 
 
@@ -25,7 +26,7 @@ type Msg
     = AddTerm
     | RemoveTerm Term
     | UpdateNewTerm String
-    | RandomizeTerms
+    | NewRandomizeTerms
     | RandomList (List Term)
     | SetScreenSize ScreenSize Int
 

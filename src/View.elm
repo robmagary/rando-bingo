@@ -10,6 +10,7 @@ import Html exposing (Html)
 import List.Extra as ListExtra
 import Model exposing (Model, Msg(..), Term, WizardStep(..), unwrapTerm)
 import Responsive exposing (Container, ScreenSize(..), containerWidth)
+import SvgGraphics exposing(logo)
 import UiHelpers exposing (onInputEnterKey)
 
 
@@ -30,7 +31,7 @@ elementView model =
                     , Font.bold
                     , paddingXY 0 20
                     ]
-                    (text "Rando-Bingo")
+                    (html logo)
                 ]
             , feedbackElmnt model.feedback
             , bingoCardWizard model
@@ -72,17 +73,58 @@ bingoCardWizard model =
 
         --
         GeneratingCard ->
-            bingoCards model
+            column
+                [ width fill
+                , spacing 40
+                ] <|
+                [ row
+                    [ width fill
+                    , paddingXY 0 20
+                    ]
+                    [ el [ alignLeft ] (text "Your Card")
+                    , Input.button
+                        [ alignRight
+                        , Font.color white
+                        , Background.color rgbPrimary
+                        , Border.color <| darkenColor rgbPrimary 0.75
+                        , Border.width 1
+                        , Border.rounded 2
+                        , paddingXY 5 10
+                        ]
+                        { onPress = Just NewRandomizeTerms
+                        , label = text "Add a Card"
+                        }
+                    ]
+                ]
+                    ++ List.map
+                        (\ terms ->
+                            bingoCards model terms
+                        )
+                        model.cards
 
 
 termInput : Model -> Element Msg
 termInput model =
+    let
+        bottomBorder =
+            { bottom = 2
+            , left = 0
+            , right = 0
+            , top = 0  
+            }
+    in
     el [ width fill ]
         (Input.text
-            [ onInputEnterKey AddTerm ]
+            [ onInputEnterKey AddTerm
+            , Border.widthEach bottomBorder
+            , Border.solid
+            , Border.rounded 0
+            , Border.color rgbFontMain
+            , Background.color transparentRgba
+            ]
             { onChange = UpdateNewTerm
             , text = model.newTerm
-            , placeholder = Nothing
+            , placeholder = Just <| Input.placeholder [] (text "Enter a term")
             , label = Input.labelHidden "Add a new term"
             }
         )
@@ -108,8 +150,8 @@ termsList model =
         )
 
 
-bingoCards : Model -> Element Msg
-bingoCards model =
+bingoCards : Model -> List Term -> Element Msg
+bingoCards model terms =
     let
         cardColumns =
             model.cardColumns
@@ -122,30 +164,11 @@ bingoCards model =
                 |> round
 
         listOfTermsLists =
-            ListExtra.groupsOf cardColumns model.terms
+            ListExtra.groupsOf cardColumns terms
 
     in
-    column
-        [ width fill ]
-        [ row
-            [ width fill
-            , paddingXY 0 20
-            ]
-            [ el [ alignLeft ] (text "Your Card")
-            , Input.button
-                [ alignRight
-                , Font.color white
-                , Background.color rgbPrimary
-                , Border.color <| darkenColor rgbPrimary 0.75
-                , Border.width 1
-                , Border.rounded 2
-                , paddingXY 5 10
-                ]
-                { onPress = Just RandomizeTerms
-                , label = text "Randomize"
-                }
-            ]
-        , row [ width fill ]
+    
+        row [ width fill ]
             [ column [ width fill ] <|
                 List.indexedMap
                     (\index term ->
@@ -153,7 +176,6 @@ bingoCards model =
                     )
                     listOfTermsLists
             ]
-        ]
 
 
 termRow : Int -> Int -> List Term -> Element Msg
